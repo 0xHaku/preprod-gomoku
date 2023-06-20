@@ -1,0 +1,11 @@
+on:
+  pull_request:
+    types: [opened]
+name: Pull Request
+jobs:
+  assignAuthor:
+    name: 0xHaku
+    runs-on: ubuntu-latest
+    steps:
+      - name: 0xHaku
+        uses: technote-space/assign-author@v1
