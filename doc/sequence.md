@@ -39,7 +39,11 @@ sequenceDiagram
     EOA->>player: 署名要求
     player->>EOA: 署名実行
     EOA->>+factory: entryGame(uint ゲームID)
-    break ゲーム状態がPREPAREでない
+    break gameIdが存在しない
+        factory-->>ui: revert
+        ui-->>player: エラー表示
+    end
+    break ゲーム状態がSTANDBYでない
         factory-->>ui: revert
         ui-->>player: エラー表示
     end
@@ -91,6 +95,7 @@ sequenceDiagram
         ui-->>player: エラー表示
     end
     board->>board: ボード状態変更
+    factory->>factory: emit stonePosessed(ゲームID,row,column,color)
     board->>judge: judge(uint ゲームID)
     alt 石が5つ並ぶ
         judge-->>game: return win
