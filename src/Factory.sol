@@ -26,24 +26,24 @@ contract Factory is Gomoku {
         return gameId;
     }
 
-    function entryGame(uint256 gameId) external gameExists(gameId) {
-        Game storage game = games[gameId];
+    function entryGame(uint256 gameId_) external gameExists(gameId_) {
+        Game storage game = games[gameId_];
         if (game.status != Status.STANDBY) revert("status not standby");
         if (game.player1 == msg.sender) revert("same as player1");
 
-        _entryPlayer(gameId, false);
-        _changeGameStatus(gameId, Status.OPEN);
+        _entryPlayer(gameId_, false);
+        _changeGameStatus(gameId_, Status.OPEN);
     }
 
-    function getGame(uint256 gameId) public view gameExists(gameId) returns(Game memory) {
-        return games[gameId];
+    function getGame(uint256 gameId_) public view gameExists(gameId_) returns(Game memory) {
+        return games[gameId_];
     }
 
-    function play(uint256 gameId, int8 row, int8 column) external gameExists(gameId) {
+    function play(uint256 gameId_, int8 row_, int8 column_) external gameExists(gameId_) {
 
         // check input range
-        if (row < 0 || row >= MEASURE_MAX_NUM) revert("row outbound");
-        if (column < 0 || column >= MEASURE_MAX_NUM) revert("column outbound");
+        if (row_ < 0 || row_ >= MEASURE_MAX_NUM) revert("row outbound");
+        if (column_ < 0 || column_ >= MEASURE_MAX_NUM) revert("column outbound");
 
         Game storage game;
         bool isBlack;
@@ -53,7 +53,7 @@ contract Factory is Gomoku {
         uint8 fixedColumn;
         Judge res;
 
-        game = games[gameId];
+        game = games[gameId_];
 
         if (game.status != Status.OPEN) revert("status not open");
 
@@ -65,8 +65,8 @@ contract Factory is Gomoku {
         if (msg.sender != turnPlayer) revert("not your turn");
 
         // posess the stone
-        fixedRow = uint8(row);
-        fixedColumn= uint8(column);
+        fixedRow = uint8(row_);
+        fixedColumn= uint8(column_);
 
         if (game.board.board[fixedRow][fixedColumn] != uint8(Stone.ENPTY)) revert("stone already exists");
         
@@ -76,40 +76,40 @@ contract Factory is Gomoku {
             game.board.stoneCount++;
         }
 
-        emit stonePosessed(gameId, row, column, color);
+        emit stonePosessed(gameId_, row_, column_, color);
 
         // judge the board
-        res = judger.judge(game.board, row, column);
+        res = judger.judge(game.board, row_, column_);
 
         // broadcast the game's result
         if (res != Judge.CONTINUE) {
-            _changeGameStatus(gameId, Status.CLOSE);
+            _changeGameStatus(gameId_, Status.CLOSE);
             if (res == Judge.WIN) {
-                emit gameResultFinalized(gameId, res, turnPlayer);
+                emit gameResultFinalized(gameId_, res, turnPlayer);
             } else {
-                emit gameResultFinalized(gameId, res, address(0));
+                emit gameResultFinalized(gameId_, res, address(0));
             }
         }
     }
 
-    modifier gameExists(uint256 gameId) {
-        if (gameId >= games.length) revert("game not exist");
+    modifier gameExists(uint256 gameId_) {
+        if (gameId_ >= games.length) revert("game not exist");
         _;
     }
 
-    function _entryPlayer(uint256 gameId, bool isBlack) internal {
-        if (isBlack) {
-            games[gameId].player1 = msg.sender;
+    function _entryPlayer(uint256 gameId_, bool isBlack_) internal {
+        if (isBlack_) {
+            games[gameId_].player1 = msg.sender;
         } else {
-            games[gameId].player2 = msg.sender;
+            games[gameId_].player2 = msg.sender;
         }
 
-        emit gameEntered(gameId, isBlack, msg.sender);
+        emit gameEntered(gameId_, isBlack_, msg.sender);
     }
 
-    function _changeGameStatus(uint256 gameId, Status status) internal {
-        games[gameId].status = status;
+    function _changeGameStatus(uint256 gameId_, Status status_) internal {
+        games[gameId_].status = status_;
 
-        emit gameStatusChanged(gameId, status);
+        emit gameStatusChanged(gameId_, status_);
     }
 }

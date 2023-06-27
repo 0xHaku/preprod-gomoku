@@ -48,6 +48,11 @@ contract FactoryTest is Test, Factory {
         assertEq(game.player1, alice);
     }
 
+    // all gameId revert by default
+    function testFail_getGame(uint256 gameId) public view {
+        factory.getGame(gameId);
+    }
+
     function test_s_entryGame() public {
         uint256 gameId = factory.createGame();
 
