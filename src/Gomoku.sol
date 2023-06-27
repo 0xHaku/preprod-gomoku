@@ -34,8 +34,9 @@ contract Gomoku {
         uint8[MEASURE_MAX_NUM][MEASURE_MAX_NUM] board;
     }
 
-    event gameCreated(uint256 indexed gameId, address player1);
-    event gameEntered(uint256 indexed gameId, address player2);
-    event gameStatusChanged(uint256 indexed gameId, Status);
+    event gameEntered(uint256 indexed gameId, bool isBlack, address player);
+    event gameStatusChanged(uint256 indexed gameId, Status status);
+    // player is zero when judge is draw
+    event gameResultFinalized(uint256 indexed gameId, Judge res, address player);
     event stonePosessed(uint256 indexed gameId, int8 row, int8 column, Stone color);
 }

@@ -27,7 +27,8 @@ contract FactoryTest is Test, Factory {
         uint256 dummyGameId = 0;
 
         vm.expectEmit();
-        emit Gomoku.gameCreated(dummyGameId, alice);
+        emit Gomoku.gameEntered(dummyGameId, true, alice);
+        vm.expectEmit();
         emit Gomoku.gameStatusChanged(dummyGameId, Status.STANDBY);
         uint256 gameId = factory.createGame();
         assertEq(dummyGameId, gameId);
@@ -52,9 +53,10 @@ contract FactoryTest is Test, Factory {
 
         vm.prank(bob);
         vm.expectEmit();
-        emit Gomoku.gameEntered(gameId, bob);
-        emit Gomoku.gameStatusChanged(gameId, Status.STANDBY);
-       factory.entryGame(gameId);
+        emit Gomoku.gameEntered(gameId, false, bob);
+        vm.expectEmit();
+        emit Gomoku.gameStatusChanged(gameId, Status.OPEN);
+        factory.entryGame(gameId);
 
         Game memory game = factory.getGame(gameId);
 

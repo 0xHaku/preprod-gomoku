@@ -33,6 +33,8 @@ contract GameTest is Test, Factory {
         int8 dummyColumn = 0;
 
         vm.prank(alice);
+        vm.expectEmit();
+        emit stonePosessed(gameId, dummyRow, dummyColumn,Stone.BLACK);
         factory.play(gameId, dummyRow, dummyColumn);
 
         Game memory game = factory.getGame(gameId);
@@ -91,6 +93,10 @@ contract GameTest is Test, Factory {
         assertTrue(game.status == Status.OPEN);
         
         vm.prank(alice);
+        vm.expectEmit();
+        emit gameStatusChanged(gameId, Status.CLOSE);
+        vm.expectEmit();
+        emit gameResultFinalized(gameId, Judge.WIN, alice);
         factory.play(gameId, 0, 4);
 
         game = factory.getGame(gameId);
@@ -241,6 +247,10 @@ contract GameTest is Test, Factory {
 
         // last turn
         vm.prank(bob);
+        vm.expectEmit();
+        emit gameStatusChanged(gameId, Status.CLOSE);
+        vm.expectEmit();
+        emit gameResultFinalized(gameId, Judge.DRAW, address(0));
         factory.play(gameId, 0, 0);
 
         Game memory game = factory.getGame(gameId);
