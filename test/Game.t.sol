@@ -257,6 +257,7 @@ contract GameTest is Test, Factory {
         assertTrue(game.status == Status.CLOSE);
     }
 
+    // calculate slot number with uint256
     function slideSlot(bytes32 baseSlot, uint256 offset) internal pure returns(bytes32) {
         return bytes32(uint256(baseSlot) + offset);
     }
