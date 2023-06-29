@@ -16,8 +16,14 @@ contract GameTest is Test, Factory {
     uint256 gameId;
 
     function setUp() public {
-        factory = new Factory();
-        factoryAddress = address(factory);
+        // goerli fork
+        if (block.chainid == 5) {
+            factory = Factory(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+        } else {
+            factory = new Factory();
+            factoryAddress = address(factory);
+        }
         
         alice = makeAddr("alice");
         bob = makeAddr("bob");
