@@ -2,11 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/Factory.sol";
+import "../src/FactoryV2.sol";
 import "../src/Gomoku.sol";
 
-contract FactoryTest is Test, Factory {
-    Factory factory;
+contract FactoryV2Test is Test, FactoryV2 {
+    FactoryV2 factory;
     address factoryAddress;
     address alice;
     address bob;
@@ -15,11 +15,16 @@ contract FactoryTest is Test, Factory {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factory = Factory(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factory = FactoryV2(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
             factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+        // localhost fork
+        } else if (block.chainid == 31336) {
+            factory = FactoryV2(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+            factoryAddress = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
         } else {
-            factory = new Factory();
+            factory = new FactoryV2();
             factoryAddress = address(factory);
+            factory.initialize();
         }
 
         alice = makeAddr("alice");
@@ -27,6 +32,11 @@ contract FactoryTest is Test, Factory {
         charlie = makeAddr("charlie");
         
         vm.startPrank(alice);
+    }
+
+    function test_s_version() public {
+        uint256 version = factory.version();
+        assertEq(version, 2);
     }
 
     function test_s_createGame() public {

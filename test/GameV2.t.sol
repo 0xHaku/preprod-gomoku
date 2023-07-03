@@ -3,12 +3,12 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "../src/Factory.sol";
+import "../src/FactoryV2.sol";
 
-contract GameTest is Test, Factory {
+contract GameV2Test is Test, FactoryV2 {
     using stdStorage for StdStorage;
 
-    Factory factory;
+    FactoryV2 factory;
     address factoryAddress;
     address alice;
     address bob;
@@ -18,11 +18,16 @@ contract GameTest is Test, Factory {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factory = Factory(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factory = FactoryV2(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
             factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+        // localhost fork
+        } else if (block.chainid == 31336) {
+            factory = FactoryV2(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+            factoryAddress = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
         } else {
-            factory = new Factory();
+            factory = new FactoryV2();
             factoryAddress = address(factory);
+            factory.initialize();
         }
         
         alice = makeAddr("alice");
@@ -84,6 +89,34 @@ contract GameTest is Test, Factory {
         vm.prank(bob);
         vm.expectRevert("stone already exists");
         factory.play(gameId, dummyRow, dummyColumn);
+    }
+
+    function test_s_resign() public {
+        Game memory game = factory.getGame(gameId);
+
+        vm.prank(game.player1);
+        vm.expectEmit();
+        emit gameStatusChanged(gameId, Status.CLOSE);
+        emit gameResultFinalized(gameId, Judge.WIN, game.player2);
+        factory.resign(gameId);
+    }
+
+    function test_f_resign() public {
+        uint256 dummyGameId;
+
+        vm.prank(alice);
+        dummyGameId = factory.createGame();
+
+        vm.prank(bob);
+        vm.expectRevert("status not open");
+        factory.resign(dummyGameId);
+
+        vm.prank(bob);
+        factory.entryGame(dummyGameId);
+
+        vm.prank(charlie);
+        vm.expectRevert("not player");
+        factory.resign(dummyGameId);
     }
 
     function test_s_win_horizon_right() public {

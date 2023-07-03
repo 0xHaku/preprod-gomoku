@@ -5,7 +5,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Gomoku.sol";
 import "./Judger.sol";
 
-contract Factory is Gomoku, Initializable {
+contract FactoryV2 is Gomoku, Initializable {
 
     Judger judger;
 
@@ -16,7 +16,7 @@ contract Factory is Gomoku, Initializable {
     }
 
     function version() external pure returns(uint256) {
-        return 1;
+        return 2;
     }
 
     function createGame() external returns(uint256) {
@@ -94,6 +94,20 @@ contract Factory is Gomoku, Initializable {
             } else {
                 emit gameResultFinalized(gameId_, res, address(0));
             }
+        }
+    }
+
+    function resign(uint256 gameId_) external gameExists(gameId_) {
+        Game storage game = games[gameId_];
+
+        if (game.status != Status.OPEN) revert("status not open");
+        if (msg.sender != game.player1 && msg.sender != game.player2) revert("not player");
+
+        _changeGameStatus(gameId_, Status.CLOSE);
+        if (msg.sender == game.player1) {
+            emit gameResultFinalized(gameId_, Judge.WIN, game.player2);
+        } else {
+            emit gameResultFinalized(gameId_, Judge.WIN, game.player1);
         }
     }
 
