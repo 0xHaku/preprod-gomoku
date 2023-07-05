@@ -1,11 +1,12 @@
 const { ethers, upgrades } = require("hardhat");
-const PROXY_CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const PROXY_CONTRACT_ADDRESS = "0x62753Fd89C49Def15F904DCB4d46531bEb9736A5";
 
 async function main() {
   const Factory = await ethers.getContractFactory("FactoryV2");
-  const factory = await upgrades.upgradeProxy(PROXY_CONTRACT_ADDRESS, Factory, {kind: "uups"});
-  await factory.deployed();
-  console.log("proxy deployed to: ", factory.address);
+  const implAddress = await upgrades.prepareUpgrade(PROXY_CONTRACT_ADDRESS, Factory, {
+    kind: "uups"
+  });
+  console.log("implemention deployed to: ", implAddress);
 }
 
 main()

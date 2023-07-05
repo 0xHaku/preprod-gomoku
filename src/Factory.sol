@@ -2,10 +2,11 @@
 pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./Gomoku.sol";
 import "./Judger.sol";
 
-contract Factory is Gomoku, Initializable {
+contract Factory is Gomoku, Initializable, UUPSUpgradeable {
 
     Judger judger;
 
@@ -117,4 +118,6 @@ contract Factory is Gomoku, Initializable {
 
         emit gameStatusChanged(gameId_, status_);
     }
+
+    function _authorizeUpgrade(address) internal override {}
 }

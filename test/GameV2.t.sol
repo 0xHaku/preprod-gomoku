@@ -18,12 +18,16 @@ contract GameV2Test is Test, FactoryV2 {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factory = FactoryV2(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
             factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factory = FactoryV2(factoryAddress);
         // localhost fork
         } else if (block.chainid == 31336) {
-            factory = FactoryV2(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
-            factoryAddress = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+            factoryAddress = address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+            factory = FactoryV2(factoryAddress);
+        // mumbai fork
+        } else if (block.chainid == 80001) {
+            factoryAddress = address(0x62753Fd89C49Def15F904DCB4d46531bEb9736A5);
+            factory = FactoryV2(factoryAddress);
         } else {
             factory = new FactoryV2();
             factoryAddress = address(factory);
@@ -278,7 +282,7 @@ contract GameV2Test is Test, FactoryV2 {
     }
 
     function test_s_draw() public {
-        uint256 gamesSlot = 1;
+        uint256 gamesSlot = 102;
         bytes32 gameSlot = keccak256(abi.encodePacked(bytes32(uint256(gamesSlot))));
 
         // forcing the board to fill

@@ -4,10 +4,10 @@ async function main() {
   const Factory = await ethers.getContractFactory("Factory");
   const factory = await upgrades.deployProxy(Factory, [], {
     initializer: "initialize",
+    kind: "uups"
   });
-  console.log("deploying...:", factory.address);
   await factory.deployed();
-  console.log("deployed to: ", factory.address);
+  console.log("proxy deployed to: ", factory.address);
 }
 
 main()
