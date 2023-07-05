@@ -1,0 +1,41 @@
+{
+  "name": "preprod-gomoku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "node": "anvil --chain-id 31336",
+    "deploy": "hardhat run script/deploy.js",
+    "upgrade": "hardhat run script/upgrade.js",
+    "upgradepropose": "hardhat run script/upgradepropose.js",
+    "test:V1": "forge test --match-contract V1",
+    "test:V2": "forge test --match-contract V2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xHaku/preprod-gomoku.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/0xHaku/preprod-gomoku/issues"
+  },
+  "homepage": "https://github.com/0xHaku/preprod-gomoku#readme",
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.9.2",
+    "@openzeppelin/hardhat-defender": "^1.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.28.0",
+    "hardhat": "^2.16.1"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.1.0"
+  }
+}

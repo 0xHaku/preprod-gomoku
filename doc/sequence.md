@@ -112,3 +112,40 @@ sequenceDiagram
     factory-->>-ui: トランザクションハッシュ
     ui-->>player: 成功表示
 ```
+## 投了する
+```mermaid
+sequenceDiagram
+    actor player
+    participant ui
+    participant EOA
+    participant factory
+    participant game
+    participant board
+    participant blockchain
+
+    player->>ui: 「投了ボタン」押下
+    ui->>EOA: トランザクション作成
+    EOA->>player: 署名要求
+    player->>EOA: 署名実行
+    EOA->>+factory: play(uint ゲームID,uint row, uint column)
+    factory->>game: ゲーム状態取得
+    break ゲーム状態がOPENでない
+        game-->>ui: revert
+        ui-->>player: エラー表示
+    end
+    break EOAがプレイヤーでない
+        game-->>ui: revert
+        ui-->>player: エラー表示
+    end
+    game->>game: ゲーム状態をCLOSEに変更
+    factory->>factory: emit gameStatusChanged(ゲームID,CLOSE)
+    alt EOA == プレイヤー1
+        factory->>factory: emit gameResultFinalized(ゲームID, WIN, プレイヤー2);
+    else EOA == プレイヤー2
+        factory->>factory: emit gameResultFinalized(ゲームID, WIN, プレイヤー1);
+    end
+
+    factory->>blockchain: ゲーム更新
+    factory-->>-ui: トランザクションハッシュ
+    ui-->>player: 成功表示
+```

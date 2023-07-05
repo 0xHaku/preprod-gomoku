@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/Factory.sol";
 
-contract GameTest is Test, Factory {
+contract GameV1Test is Test, Factory {
     using stdStorage for StdStorage;
 
     Factory factory;
@@ -18,11 +18,20 @@ contract GameTest is Test, Factory {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factory = Factory(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
             factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factory = Factory(factoryAddress);
+        // localhost fork
+        } else if (block.chainid == 31336) {
+            factoryAddress = address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+            factory = Factory(factoryAddress);
+        // mumbai fork
+        } else if (block.chainid == 80001) {
+            factoryAddress = address(0x62753Fd89C49Def15F904DCB4d46531bEb9736A5);
+            factory = Factory(factoryAddress);
         } else {
             factory = new Factory();
             factoryAddress = address(factory);
+            factory.initialize();
         }
         
         alice = makeAddr("alice");
@@ -245,7 +254,7 @@ contract GameTest is Test, Factory {
     }
 
     function test_s_draw() public {
-        uint256 gamesSlot = 1;
+        uint256 gamesSlot = 102;
         bytes32 gameSlot = keccak256(abi.encodePacked(bytes32(uint256(gamesSlot))));
 
         // forcing the board to fill
