@@ -12,10 +12,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "node": "anvil --chain-id 31336",
     "deploy": "hardhat run script/deploy.js",
-    "upgrade": "hardhat run script/upgrade.js",
+    "upgrade:V2": "hardhat run script/upgradeV2.js",
+    "upgrade:V3": "hardhat run script/upgradeV3.js",
     "upgradepropose": "hardhat run script/upgradepropose.js",
     "test:V1": "forge test --match-contract V1",
-    "test:V2": "forge test --match-contract V2"
+    "test:V2": "forge test --match-contract V2",
+    "test:V3": "forge test --match-contract V3"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
   },
   "homepage": "https://github.com/0xHaku/preprod-gomoku#readme",
   "dependencies": {
+    "@openzeppelin/contracts": "^4.9.2",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
     "@openzeppelin/hardhat-defender": "^1.9.0",
     "@openzeppelin/hardhat-upgrades": "^1.28.0",

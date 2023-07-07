@@ -14,6 +14,10 @@ sequenceDiagram
     EOA->>owner: 署名要求
     owner->>EOA: 署名実行
     EOA->>+factory: createGame() return (uint)
+    break msg.value != 0.01ETH
+        factory->>ui: revert
+        ui-->>owner: エラー表示
+    end
     factory->>factory: ゲーム生成
     factory->>game: プレイヤー1にEOAを登録
     factory->>factory: ゲームIDインクリメント
@@ -39,6 +43,10 @@ sequenceDiagram
     EOA->>player: 署名要求
     player->>EOA: 署名実行
     EOA->>+factory: entryGame(uint ゲームID)
+    break msg.value != 0.01ETH
+        factory->>ui: revert
+        ui-->>player: エラー表示
+    end
     break gameIdが存在しない
         factory-->>ui: revert
         ui-->>player: エラー表示
@@ -63,12 +71,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor player
+    actor factoryowner
     participant ui
     participant EOA
     participant factory
     participant game
     participant board
     participant judge
+    participant gmk
     participant blockchain
 
     player->>ui: 「ボード上の空マス」押下
@@ -108,6 +118,14 @@ sequenceDiagram
         game->>game: ゲーム状態をCLOSEに変更
         factory->>factory: emit gameStatusChanged(ゲームID,CLOSE)
     end
+    alt win
+        factory->>player: 0.015ETH送金
+        factory->>factoryowner: 0.005ETH送金
+        factory->>gmk: 100GMK ミント
+        gmk->>player: 100GMK 転送
+    else draw
+        factory->>factoryowner: 0.02ETH送金
+    end
     factory->>blockchain: ゲーム更新
     factory-->>-ui: トランザクションハッシュ
     ui-->>player: 成功表示
@@ -116,12 +134,15 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor player
+    actor opponent
+    actor factoryowner
     participant ui
     participant EOA
     participant factory
     participant game
     participant board
     participant blockchain
+    participant gmk
 
     player->>ui: 「投了ボタン」押下
     ui->>EOA: トランザクション作成
@@ -144,7 +165,10 @@ sequenceDiagram
     else EOA == プレイヤー2
         factory->>factory: emit gameResultFinalized(ゲームID, WIN, プレイヤー1);
     end
-
+    factory->>opponent: 0.015ETH送金
+    factory->>factoryowner: 0.005ETH送金
+    factory->>gmk: 100GMK ミント
+    gmk->>opponent: 100GMK 転送
     factory->>blockchain: ゲーム更新
     factory-->>-ui: トランザクションハッシュ
     ui-->>player: 成功表示
