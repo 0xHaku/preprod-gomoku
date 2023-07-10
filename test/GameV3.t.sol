@@ -20,18 +20,30 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factoryAddress = address(
+                0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D
+            );
             factory = FactoryV3(factoryAddress);
-        // localhost fork
+            // localhost fork
         } else if (block.chainid == 31336) {
-            factoryAddress = address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+            factoryAddress = address(
+                0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+            );
             factory = FactoryV3(factoryAddress);
-            vm.store(factoryAddress, bytes32(uint256(103)), addressToBytes32(address(this)));
-            gomokuTokenMockAddress = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+            vm.store(
+                factoryAddress,
+                bytes32(uint256(103)),
+                addressToBytes32(address(this))
+            );
+            gomokuTokenMockAddress = address(
+                0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+            );
             gomokuTokenMock = GomokuToken(gomokuTokenMockAddress);
-        // mumbai fork
+            // mumbai fork
         } else if (block.chainid == 80001) {
-            factoryAddress = address(0x62753Fd89C49Def15F904DCB4d46531bEb9736A5);
+            factoryAddress = address(
+                0x62753Fd89C49Def15F904DCB4d46531bEb9736A5
+            );
             factory = FactoryV3(factoryAddress);
         } else {
             factory = new FactoryV3();
@@ -40,10 +52,10 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
             gomokuTokenMockAddress = address(gomokuTokenMock);
             factory.initialize(gomokuTokenMockAddress);
         }
-        
+
         alice = makeAddr("alice");
         bob = makeAddr("bob");
-        
+
         vm.deal(alice, 10 ether);
         vm.deal(bob, 10 ether);
 
@@ -59,11 +71,14 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
 
         vm.prank(alice);
         vm.expectEmit();
-        emit stonePosessed(gameId, dummyRow, dummyColumn,Stone.BLACK);
+        emit stonePosessed(gameId, dummyRow, dummyColumn, Stone.BLACK);
         factory.play(gameId, dummyRow, dummyColumn);
 
         Game memory game = factory.getGame(gameId);
-        assertEq(game.board.board[uint8(dummyRow)][uint8(dummyColumn)], uint256(Stone.BLACK));
+        assertEq(
+            game.board.board[uint8(dummyRow)][uint8(dummyColumn)],
+            uint256(Stone.BLACK)
+        );
     }
 
     function test_f_play() public {
@@ -98,7 +113,10 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         factory.play(gameId, dummyRow, dummyColumn);
 
         Game memory game = factory.getGame(gameId);
-        assertEq(game.board.board[uint8(dummyRow)][uint8(dummyColumn)], uint256(Stone.BLACK));
+        assertEq(
+            game.board.board[uint8(dummyRow)][uint8(dummyColumn)],
+            uint256(Stone.BLACK)
+        );
 
         vm.prank(bob);
         vm.expectRevert("stone already exists");
@@ -108,11 +126,26 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
     function test_s_resign() public {
         Game memory game = factory.getGame(gameId);
 
+        // player1 resign
         vm.prank(game.player1);
         vm.expectEmit();
         emit gameStatusChanged(gameId, Status.CLOSE);
         emit gameResultFinalized(gameId, Judge.WIN, game.player2);
         factory.resign(gameId);
+
+        uint256 dummyGameId;
+
+        // player2 resign
+        vm.prank(alice);
+        dummyGameId = factory.createGame{value: 0.01 ether}();
+        vm.prank(bob);
+        factory.entryGame{value: 0.01 ether}(dummyGameId);
+
+        vm.prank(game.player2);
+        vm.expectEmit();
+        emit gameStatusChanged(dummyGameId, Status.CLOSE);
+        emit gameResultFinalized(dummyGameId, Judge.WIN, game.player1);
+        factory.resign(dummyGameId);
     }
 
     function test_f_resign() public {
@@ -141,14 +174,14 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         uint256 befAliceEthBalance = alice.balance;
         uint256 befBobEthBalance = bob.balance;
         uint256 befTestEthBalance = address(this).balance;
-        
-        for(uint8 i; i < 8; i++) {
+
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(i % 2), int8(i / 2));
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         vm.expectEmit();
         emit gameStatusChanged(gameId, Status.CLOSE);
@@ -171,13 +204,13 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(i % 2), int8(i / 2));
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 0, 4);
 
@@ -190,13 +223,13 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(i % 2), int8(4 - i / 2));
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 0, 0);
 
@@ -209,13 +242,13 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(4 - i / 2), int8(i % 2));
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 0, 0);
 
@@ -228,13 +261,13 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(i / 2), int8(i % 2));
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 4, 0);
 
@@ -247,13 +280,17 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
-            factory.play(gameId, MEASURE_MAX_NUM - 1 - int8(i / 2), int8(i / 2) + int8(i % 2));
+            factory.play(
+                gameId,
+                MEASURE_MAX_NUM - 1 - int8(i / 2),
+                int8(i / 2) + int8(i % 2)
+            );
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 11, 4);
 
@@ -266,13 +303,17 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
-            factory.play(gameId, int8(i / 2) + int8(i % 2), MEASURE_MAX_NUM - 1 - int8(i / 2));
+            factory.play(
+                gameId,
+                int8(i / 2) + int8(i % 2),
+                MEASURE_MAX_NUM - 1 - int8(i / 2)
+            );
         }
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 4, 11);
 
@@ -285,14 +326,18 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
-            factory.play(gameId, MEASURE_MAX_NUM - 1 - int8(i / 2), MEASURE_MAX_NUM - 1 - int8(i % 2) - int8(i / 2));
+            factory.play(
+                gameId,
+                MEASURE_MAX_NUM - 1 - int8(i / 2),
+                MEASURE_MAX_NUM - 1 - int8(i % 2) - int8(i / 2)
+            );
         }
 
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 11, 11);
 
@@ -305,14 +350,14 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
         players[0] = alice;
         players[1] = bob;
 
-        for(uint8 i; i < 8; i++) {
+        for (uint8 i; i < 8; i++) {
             vm.prank(players[i % 2]);
             factory.play(gameId, int8(i / 2), int8(i % 2) + int8(i / 2));
         }
 
         Game memory game = factory.getGame(gameId);
         assertTrue(game.status == Status.OPEN);
-        
+
         vm.prank(alice);
         factory.play(gameId, 4, 4);
 
@@ -322,13 +367,19 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
 
     function test_s_draw() public {
         uint256 gamesSlot = 102;
-        bytes32 gameSlot = keccak256(abi.encodePacked(bytes32(uint256(gamesSlot))));
+        bytes32 gameSlot = keccak256(
+            abi.encodePacked(bytes32(uint256(gamesSlot)))
+        );
         uint256 befAliceEthBalance = alice.balance;
         uint256 befBobEthBalance = bob.balance;
         uint256 befTestEthBalance = address(this).balance;
 
         // forcing the board to fill
-        vm.store(factoryAddress, slideSlot(gameSlot,2), bytes32(uint256(type(uint8).max)));
+        vm.store(
+            factoryAddress,
+            slideSlot(gameSlot, 2),
+            bytes32(uint256(type(uint8).max))
+        );
 
         // last turn
         vm.prank(bob);
@@ -349,5 +400,6 @@ contract GameV3Test is Test, TestUtil, FactoryV3 {
     }
 
     receive() external payable {}
+
     fallback() external payable {}
 }

@@ -19,18 +19,30 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
     function setUp() public {
         // goerli fork
         if (block.chainid == 5) {
-            factoryAddress = address(0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D);
+            factoryAddress = address(
+                0xc4755eF5BDD32d98af691E43434f3a19bA53aB5D
+            );
             factory = FactoryV3(factoryAddress);
-        // localhost fork
+            // localhost fork
         } else if (block.chainid == 31336) {
-            factoryAddress = address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+            factoryAddress = address(
+                0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+            );
             factory = FactoryV3(factoryAddress);
-            vm.store(factoryAddress, bytes32(uint256(103)), addressToBytes32(address(this)));
-            gomokuTokenMockAddress = address(0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0);
+            vm.store(
+                factoryAddress,
+                bytes32(uint256(103)),
+                addressToBytes32(address(this))
+            );
+            gomokuTokenMockAddress = address(
+                0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+            );
             gomokuTokenMock = GomokuToken(gomokuTokenMockAddress);
-        // mumbai fork
+            // mumbai fork
         } else if (block.chainid == 80001) {
-            factoryAddress = address(0xacc45D1f7811B5eD7C0c4fB1d372168D217C5861);
+            factoryAddress = address(
+                0xacc45D1f7811B5eD7C0c4fB1d372168D217C5861
+            );
             factory = FactoryV3(factoryAddress);
         } else {
             factory = new FactoryV3();
@@ -47,7 +59,7 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
         vm.deal(alice, 10 ether);
         vm.deal(bob, 10 ether);
         vm.deal(charlie, 10 ether);
-        
+
         vm.startPrank(alice);
     }
 
@@ -69,10 +81,16 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
         dummyGameId++;
 
         gameId = factory.createGame{value: 0.01 ether}();
-        assertEq(dummyGameId, gameId);        
+        assertEq(dummyGameId, gameId);
     }
 
     function test_f_createGame() public {
+        vm.expectRevert("diferent play fee");
+        factory.createGame();
+    }
+
+    function test_fuzz_createGame_playFee(uint256 playFee) public {
+        vm.assume(playFee != 0.01 ether);
         vm.expectRevert("diferent play fee");
         factory.createGame();
     }
@@ -127,6 +145,12 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
         vm.prank(charlie);
         vm.expectRevert("status not standby");
         factory.entryGame{value: 0.01 ether}(gameId);
+    }
+
+    function test_fuzz_entryGame_playFee(uint256 playFee) public {
+        vm.assume(playFee != 0.01 ether);
+        vm.expectRevert("diferent play fee");
+        factory.createGame();
     }
 
     function test_f_play() public {
