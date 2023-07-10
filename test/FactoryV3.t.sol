@@ -68,6 +68,22 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
         assertEq(version, 3);
     }
 
+    function test_s_initialize() public {
+        FactoryV3 dummyFactory = new FactoryV3();
+        address dummyFactoryAddress = address(dummyFactory);
+        GomokuToken dummyGomokuTokenMock = new GomokuToken(dummyFactoryAddress);
+        address dummyGomokuTokenMockAddress = address(dummyGomokuTokenMock);
+        dummyFactory.initialize(address(dummyGomokuTokenMockAddress));
+    }
+
+    function test_s_reInitializeUpgrade() public {
+        FactoryV3 dummyFactory = new FactoryV3();
+        address dummyFactoryAddress = address(dummyFactory);
+        GomokuToken dummyGomokuTokenMock = new GomokuToken(dummyFactoryAddress);
+        address dummyGomokuTokenMockAddress = address(dummyGomokuTokenMock);
+        dummyFactory.reInitializeUpgrade(address(dummyGomokuTokenMockAddress));
+    }
+
     function test_s_createGame() public {
         uint256 dummyGameId = 0;
 
@@ -160,5 +176,10 @@ contract FactoryV3Test is Test, TestUtil, FactoryV3 {
 
         vm.expectRevert("status not open");
         factory.play(gameId, dummyRow, dummyColumn);
+    }
+
+    function test_f_mint() public {
+        vm.expectRevert("not factory");
+        gomokuToken.mint(alice, 100);
     }
 }
