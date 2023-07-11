@@ -7,6 +7,9 @@ import "./IGomokuToken.sol";
 import "./Gomoku.sol";
 import "./Judger.sol";
 
+/// @title factory of gomoku-game
+/// @author 0xHaku
+/// @notice You can use this contract for launch and play gomoku-game
 contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
 
     uint256 public constant PLAYFEE = 0.01 ether;
@@ -17,22 +20,32 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
 
     Judger judger;
 
+    /// @dev games are identified by gameId
     Game[] games;
 
     address public owner;
 
     IGomokuToken public gomokuToken;
 
+    /// @notice Set the initial value when the contruct is launched
+    /// @dev Performed during UUPS deployment
+    /// @param gomokuToken_ gomokutoken
     function initialize(address gomokuToken_) public initializer {
         judger = new Judger();
         gomokuToken = IGomokuToken(gomokuToken_);
         owner = msg.sender;
     }
 
+    /// @notice Number of times this contraption has been improved.
+    /// @dev Incremented each time a UUPS upgrade is performed
+    /// @return version actual version
     function version() external pure returns(uint256) {
         return 3;
     }
 
+    /// @notice You can pay fee and get the game up and running.
+    /// @dev Create a game instance and push it to the games array
+    /// @return gameId Identify launched games
     function createGame() external payable returns(uint256) {
         if (msg.value != PLAYFEE) revert("diferent play fee");
 
@@ -47,6 +60,8 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
         return gameId;
     }
 
+    /// @notice You can specify the gameId you want to join and pay fee to join.
+    /// @param gameId_ gameId you would like to participate in
     function entryGame(uint256 gameId_) external payable gameExists(gameId_) {
         if (msg.value != PLAYFEE) revert("diferent play fee");
 
@@ -58,10 +73,18 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
         _changeGameStatus(gameId_, Status.OPEN);
     }
 
+    /// @notice Get the current game information of the specified gameId
+    /// @dev Game strust is in Gomoku.sol
+    /// @param gameId you would like to get
+    /// @return game Game strust
     function getGame(uint256 gameId_) public view gameExists(gameId_) returns(Game memory) {
         return games[gameId_];
     }
 
+    /// @notice Place a stone on the board and judge who wins or loses
+    /// @param gameId_ you would like to play
+    /// @param row_ Row where you want to place the stone
+    /// @param column_ Column where you want to place the stone
     function play(uint256 gameId_, int8 row_, int8 column_) external gameExists(gameId_) {
 
         // check input range
@@ -119,6 +142,9 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
         }
     }
 
+    /// @notice Surrender in the game specified.
+    /// @dev Win a player who is not the player who surrendered
+    /// @param gameId_ you would like to resign
     function resign(uint256 gameId_) external gameExists(gameId_) {
         Game storage game = games[gameId_];
 
@@ -133,11 +159,17 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
         }
     }
 
+    /// @notice Continue only when the specified gameId exists
+    /// @param gameId_ you would like to check
     modifier gameExists(uint256 gameId_) {
         if (gameId_ >= games.length) revert("game not exist");
         _;
     }
 
+    /// @notice Enter the specified game
+    /// @dev Depending on whether you are the first or the second player, you can register at different places.
+    /// @param gameId_ you would like to entry
+    /// @param isBlack_ Flag whether the first move is made or not.
     function _entryPlayer(uint256 gameId_, bool isBlack_) internal {
         if (isBlack_) {
             games[gameId_].player1 = msg.sender;
@@ -148,6 +180,9 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
         emit gameEntered(gameId_, isBlack_, msg.sender);
     }
 
+    /// @notice Change the status of the game specified by gameId to the specified one.
+    /// @param gameId_ you would like to change
+    /// @param status_ 
     function _changeGameStatus(uint256 gameId_, Status status_) internal {
         games[gameId_].status = status_;
 
@@ -155,6 +190,10 @@ contract FactoryV3 is Gomoku, Initializable, UUPSUpgradeable {
     }
 
     function _authorizeUpgrade(address) internal override {}
+
+    /// @notice Set the initial value when the contruct is upgraded
+    /// @dev Performed during UUPS upgrade
+    /// @param gomokuToken_ gomokutoken
     function reInitializeUpgrade(address gomokuToken_) external {
         gomokuToken = IGomokuToken(gomokuToken_);
         owner = msg.sender;

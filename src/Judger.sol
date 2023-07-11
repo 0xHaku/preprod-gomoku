@@ -5,6 +5,7 @@ import "./Gomoku.sol";
 import "./JudgeLibrary.sol";
 
 contract Judger is Gomoku {
+    // working against the Board
     using JudgeLibrary for uint8[MEASURE_MAX_NUM][MEASURE_MAX_NUM];
     
     function judge(Board calldata board_, int8 row_, int8 column_) external pure returns(Judge){
