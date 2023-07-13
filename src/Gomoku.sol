@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+/// @title define the basic structureof gomoku-game
+/// @author 0xHaku
+/// @notice You can use this contract for launch and play gomoku-game
+/// @dev games are identified by gameId
 contract Gomoku {
     int8 public constant MEASURE_MAX_NUM = 16;
     
